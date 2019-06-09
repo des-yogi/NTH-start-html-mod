@@ -1,0 +1,52 @@
+<!--DEV
+
+@ @include('blocks/main-nav/main-nav.html')
+
+- Структура меню — в main-nav.data.pug
+
+<nav class="main-nav" id="nav">
+
+  <button class="burger main-nav__toggler" aria-label="Показать главное меню" data-target-id="nav" data-target-class-toggle="main-nav--open">
+    <span>Показать главное меню</span>
+  </button>
+
+  <ul class="main-nav__list">
+    <li class="main-nav__item">
+      <a class="main-nav__link" href="/">Главная страница</a>
+    </li>
+    <li class="main-nav__item  main-nav__item--has-child">
+      <a class="main-nav__link" href="/pages">Страницы</a>
+      <div class="main-nav__sublist-wrapper  main-nav__sublist-wrapper--lvl-2">
+        <ul class="main-nav__list  main-nav__list--lvl-2">
+          <li class="main-nav__item  main-nav__item--lvl-2">
+            <a class="main-nav__link  main-nav__link--lvl-2" href="pages/about">О компании</a>
+          </li>
+          <li class="main-nav__item  main-nav__item--has-child  main-nav__item--lvl-2">
+            <a class="main-nav__link  main-nav__link--lvl-2" href="pages/services">Услуги</a>
+            <div class="main-nav__sublist-wrapper  main-nav__sublist-wrapper--lvl-3">
+              <ul class="main-nav__list  main-nav__list--lvl-3">
+                <li class="main-nav__item  main-nav__item--lvl-3">
+                  <a class="main-nav__link  main-nav__link--lvl-3" href="pages/services/serve">Вёрстка</a>
+                </li>
+                <li class="main-nav__item  main-nav__item--lvl-3">
+                  <a class="main-nav__link  main-nav__link--lvl-3" href="pages/services/strip">Стриптиз</a>
+                </li>
+              </ul>
+            </div>
+          </li>
+          <li class="main-nav__item  main-nav__item--lvl-2">
+            <a class="main-nav__link  main-nav__link--lvl-2" href="pages/some">Ещё одна страница</a>
+          </li>
+        </ul>
+      </div>
+    </li>
+    <li class="main-nav__item">
+      <a class="main-nav__link" href="https://github.com/nicothin/NTH-start-project">Репозиторий</a>
+    </li>
+    <li class="main-nav__item">
+      <a class="main-nav__link" href="https://nicothin.pro/contact">Контакты автора</a>
+    </li>
+  </ul>
+</nav>
+
+-->
