@@ -1,7 +1,5 @@
 // Стилизация БЭМ-блока page.
 // Общие стили тегов.
-// Подключение шрифтов.
-// Типографика.
 
 
 // Сделаем viewport великим снова! (привет, IE10) http://timkadlec.com/2012/10/ie10-snap-mode-and-responsive-design/
@@ -11,18 +9,6 @@
     width: device-width;
   }
 }
-
-
-/* stylelint-disable */
-// @font-face {
-//   font-family: 'FONTNAME';
-//   src: url('../fonts/FONTNAME.woff2') format('woff2'),
-//        url('../fonts/FONTNAME.woff') format('woff');
-//   font-weight: 400;
-//   font-style: normal;
-//   font-display: swap;
-// }
-/* stylelint-enable */
 
 
 .page {
@@ -62,16 +48,8 @@ body {
   flex-direction: column;  // и прижимаем footer в IE 10-11
   margin: 0;
   min-height: 100%;
-  word-break: break-word;
-  font-family: $font-family;
-  font-size: $font-size;
-  line-height: $line-height;
-  text-align: left;
   color: $text-color;
   background-color: $body-bg;
-
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale
 }
 
 [tabindex='-1']:focus {
@@ -188,151 +166,68 @@ hr {
   border-top: 1px solid $border-color;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  margin-top: 1em;
-  margin-bottom: 0.5em;
-  font-family: $font-family;
-  font-weight: 700;
-  line-height: 1.2;
-  color: currentColor;
-}
-
-h1 { font-size: $font-size-h1; }
-h2 { font-size: $font-size-h2; }
-h3 { font-size: $font-size-h3; }
-h4 { font-size: $font-size-h4; }
-h5 { font-size: $font-size-h5; }
-h6 { font-size: $font-size-h6; }
-
-p,
-ul,
-ol,
-dl,
-table,
-blockquote,
-pre,
-address,
-figure {
-  margin-top: 0;
-  margin-bottom: $typo-margin-vertical;
-}
-
-p {
-  // http://clagnut.com/blog/2395
-  hyphens: auto;
-  hyphenate-limit-chars: 6 3 3;
-  hyphenate-limit-lines: 2;
-  hyphenate-limit-last: always;   
-  hyphenate-limit-zone: 8%;
-}
-
-address {
-  font-style: normal;
-}
-
-ul,
-ol {
-  margin-bottom: $typo-margin-vertical;
-  padding-left: 1.5em;
-
-  ul,
-  ol {
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-}
-
-li {
-  line-height: inherit;
-}
-
-// dt {
-//   font-weight: 700;
-// }
-
-// dd {
-//   margin-left: 0;
-
-//   @media (min-width: $screen-sm) {
-//     margin-left: 1.5rem;
-//   }
-
-//   & + dt {
-//     margin-top: ($line-height / 2);
-//   }
-// }
-
-// .small,
-small {
-  font-size: $font-size-sm;
-}
-
-sub,
-sup {
-  font-size: $font-size-sm;
-}
-
-// .mark,
-// mark {
-//   background: rgba($color-warning, 0.3);
-//   padding: 0.1em 0.3em;
-// }
-
-b,
-strong {
-  font-weight: bolder;
-}
-
-// abbr[title] {
-//   text-decoration: underline dotted;
-// }
-
-blockquote {
+.visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  width: 1px;
+  margin: -1px;
   padding: 0;
-  margin-left: 0;
-  margin-right: 0;
+  border: 0;
 }
 
-// samp,
-code,
-kbd,
-pre {
-  font-family: $font-family--monospace;
-}
-
-code {
-  padding: 0.06em 0.3em;
-  color: $text-color;
-  background-color: rgba(#000, 0.08);
-  border-radius: $border-radius;
-}
-
-kbd {
-  padding: 0.06em 0.3em;
-  color: $text-color;
-  background-color: $gray-lightest;
-  border-radius: $border-radius;
-
-  kbd {
-    padding: 0;
+.clearfix {
+  &:before,
+  &:after {
+    content: "";
+    display: table;
+  }
+  &:after {
+    clear: both;
   }
 }
 
-pre {
+// @include container(); // это контейнер, padding по умолчанию (из переменной) - стандартный способ
+// Стили для блока container созданы на основе способа, описанного Lea Verou в книге CSS Secrets
+.container {
+  $padding-xs: 10px !default;
+  $padding-md: 20px !default;
+  $padding-lg: 20px !default;
+  $padding-xl: 40px !default;
+
   display: block;
   width: 100%;
-  margin-bottom: $typo-margin-vertical;
-  overflow-x: auto;
-  tab-size: 2;
-  background-color: rgba(#000, 0.08);
+  padding-left: $padding-xs;
+  padding-right: $padding-xs;
+  background: none;
 
-  code {
-    background: transparent;
+  @media (min-width: $screen-md) {
+    padding-left: $padding-md;
+    padding-right: $padding-md;
+  }
+
+  @media (min-width: $screen-xl) {
+    $padding-min: $padding-xl; // нужный отступ от края экрана
+    $half-screen-xl: $screen-xl / 2 - $padding-min;
+    // padding: 1em calc(50% - 600px); //600px - это $screen-xl / 2 - нужный отступ от края экрана
+    padding-left: calc(50% - #{$half-screen-xl});
+    padding-right: calc(50% - #{$half-screen-xl});
   }
 }
 
+.row {
+  // @include row(); // это прямой родитель сетки, margin по умолчанию (из переменной)
+  // Родитель. Указаны промежутки между ячейками: XS|SM|MD|LG|XL|XXL;
+  // @include row($grid-gutter-width, 10px, 12px, 16px, 20px, 26px);
+  @include row();
+}
+
+//** .col-name {
+// @include col(); // малые ширины — 12 из 12, промежутки по умолчанию
+// @include col(sm, 6, $grid-columns, 10px);  // SM (480 по умолчанию) — 6 из 12, промежутки 10px
+// @include col(md, 4, $grid-columns, 12px);  // MD (768 по умолчанию) — 4 из 12, промежутки 12px
+// @include col(lg, 3, $grid-columns, 16px);  // LG (992 по умолчанию) — 3 из 12, промежутки 16px
+// @include col(xl, 2, $grid-columns, 20px);  // XL (1200 по умолчанию) — 2 из 12, промежутки 20px
+// @include col(xxl, 1, $grid-columns, 26px); // XXL (1800 по умолчанию) — 1 из 12, промежутки 26px
+//**}

@@ -1,5 +1,3 @@
-design/
-docs/
 build/*
 !build/readme.md
 
