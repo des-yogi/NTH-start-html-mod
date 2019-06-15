@@ -12,21 +12,10 @@ $gray-lighter:                hsl(0, 0%, 80%);
 $gray-lightest:               hsl(0, 0%, 90%);
 $white:                       hsl(0, 0%, 100%);
 
-$color-main:                  $main-color; // для совместимости с моими привычными переменными
-$color-success:               hsl(120, 39%, 54%);
-$color-danger:                hsl(2, 64%, 58%);
-$color-warning:               hsl(35, 84%, 62%);
-
-$color-vk:                    #4a76a8;
-$color-fb:                    #4267b2;
-$color-tw:                    #40A2F5;
-$color-gh:                    #24292e;
-
-
-
 // Семантические цвета
 
 $main-color:                  #4a76a8;
+$color-main:                  $main-color; // для совместимости с моими привычными переменными
 $second-color:                #4a76a8;
 $title-color:                 $black;
 $text-color:                  $gray-darkest;
@@ -38,6 +27,18 @@ $link-color:                  $main-color;
 $link-color--hover:           darken($color-main, 15%);
 
 $border-color:                $gray-lighten;
+
+
+// Стандартные цвета для большинства проектов
+
+$color-success:               hsl(120, 39%, 54%);
+$color-danger:                hsl(2, 64%, 58%);
+$color-warning:               hsl(35, 84%, 62%);
+
+$color-vk:                    #4a76a8;
+$color-fb:                    #4267b2;
+$color-tw:                    #40A2F5;
+$color-gh:                    #24292e;
 
 
 

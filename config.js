@@ -9,6 +9,8 @@ let config = {
   ],
   'alwaysAddBlocks': [
     // 'sprite-png',
+    'page',
+    'typo',
     'sprite-svg',
     'object-fit-polyfill',
   ],
@@ -30,7 +32,6 @@ let config = {
   'addAssets': {
     'src/fonts/*.{woff,woff2}': 'fonts/',
     'src/img/*.{png,svg,jpg,jpeg,webp}': 'img/',
-    //'src/libs/**/*.{jse}': 'libs/',
     // 'src/favicon/*.{png,ico,svg,xml,webmanifest}': 'img/favicon',
     // 'node_modules/somePackage/images/*.{png,svg,jpg,jpeg}': 'img/',
   },

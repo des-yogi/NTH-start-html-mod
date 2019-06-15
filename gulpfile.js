@@ -2,14 +2,6 @@
 /* eslint-disable no-console */
 'use strict';
 
-// Проверка количества съедаемой памяти
-// setInterval(function(){ // eslint-disable-line
-//   let memory = process.memoryUsage()
-//   let date = new Date();
-//   console.log(`[${addZero(date.getHours())}:${addZero(date.getMinutes())}:${addZero(date.getSeconds())}]`, 'Memory usage (heapUsed):', (memory.heapUsed / 1024 / 1024).toFixed(2) + 'Mb');
-// }, 1000 * 10);
-// function addZero(i) { return (i < 10) ? i = "0" + i : i;}
-
 // Пакеты, использующиеся при обработке
 //const { series, parallel, src, dest, watch, lastRun } = require('gulp');
 const { series, parallel, src, dest, watch } = require('gulp');
@@ -43,6 +35,9 @@ const replace = require('gulp-replace');
 const ghpages = require('gh-pages');
 const path = require('path');
 
+var Fiber = require('fibers');
+const TerserPlugin = require('terser-webpack-plugin');
+
 const realFavicon = require ('gulp-real-favicon');
 
 // Глобальные настройки этого запуска
@@ -57,7 +52,7 @@ const dir = nth.config.dir;
 const faviconData = './faviconData.json';
 
 // Сообщение для компилируемых файлов
-let doNotEditMsg = '\n ВНИМАНИЕ! Этот файл генерируется автоматически.\n Любые изменения этого файла будут потеряны при следующей компиляции!\n Любое изменение проекта без возможности компиляции вылезет боком :)\n\n';
+let doNotEditMsg = '\n ВНИМАНИЕ! Этот файл генерируется автоматически.\n Любые изменения этого файла будут потеряны при следующей компиляции!\n\n';
 
 // Настройки pug-компилятора
 /*let pugOption = {
@@ -232,7 +227,8 @@ function writeSassImportsFile(cb) {
     newScssImportsList.push(src);
   });
   nth.config.alwaysAddBlocks.forEach(function(blockName) {
-    newScssImportsList.push(`${dir.blocks}${blockName}/${blockName}.scss`);
+    // newScssImportsList.push(`${dir.blocks}${blockName}/${blockName}.scss`); дает ошибку при компиляции блока с отсутсвующим файлом стилей scss
+    if (fileExist(`${dir.blocks}${blockName}/${blockName}.scss`)) newScssImportsList.push(`${dir.blocks}${blockName}/${blockName}.scss`);
   });
   let allBlocksWithScssFiles = getDirectories('scss');
   allBlocksWithScssFiles.forEach(function(blockWithScssFile){
@@ -274,15 +270,43 @@ function compileSass() {
       }
     }))
     .pipe(debug({title: 'Compiles:'}))
+    .pipe(sass({
+      fiber: Fiber,
+      includePaths: [__dirname+'/','node_modules']
+    }))
+    .pipe(postcss(postCssPlugins))
+    /*.pipe(csso({
+      restructure: false,
+    }))*/
+    .pipe(dest(`${dir.build}/css`, { sourcemaps: '.' }))
+    .pipe(browserSync.stream());
+}
+exports.compileSass = compileSass;
+
+
+function compileSassProd() {
+  const fileList = [
+    `${dir.src}scss/style.scss`,
+  ];
+  if(buildLibrary) fileList.push(`${dir.blocks}blocks-library/blocks-library.scss`);
+  return src(fileList, { sourcemaps: false })
+    .pipe(plumber({
+      errorHandler: function (err) {
+        console.log(err.message);
+        this.emit('end');
+      }
+    }))
+    .pipe(debug({title: 'Compiles Prod:'}))
     .pipe(sass({includePaths: [__dirname+'/','node_modules']}))
     .pipe(postcss(postCssPlugins))
     .pipe(csso({
       restructure: false,
     }))
-    .pipe(dest(`${dir.build}/css`, { sourcemaps: '.' }))
-    .pipe(browserSync.stream());
+    .pipe(dest(`${dir.build}/css`))
+    //.pipe(browserSync.stream());
 }
-exports.compileSass = compileSass;
+exports.compileSassProd = compileSassProd;
+
 
 // Сборка HTML
 function compileHtml() {
@@ -421,11 +445,46 @@ function buildJs() {
   return src(`${dir.src}js/entry.js`)
     .pipe(plumber())
     .pipe(webpackStream({
+      //mode: 'none',
       //mode: 'production',
-      mode: 'none',
+      mode: 'development',
       entry: entryList,
       output: {
         filename: '[name].js',
+      },
+      optimization: {
+        removeAvailableModules: true, // удаляет дубликаты модулей
+        //concatenateModules: true, // дефолтные настройки для production-mode
+        //minimize: true, // дефолтные настройки для production-mode
+        minimizer: [
+          new TerserPlugin({
+            chunkFilter: (chunk) => {
+              // Exclude uglification for the `bundle` chunk
+              if (chunk.name === 'bundle') {
+                return false;
+              }
+
+              return true;
+            },
+            cache: true, // кеширование может вызвать конфликт !
+            parallel: true,
+            terserOptions: { // просто удаляем ВСЕ комментарии
+              output: {
+                comments: false,
+              },
+            },
+          }),
+        ],
+        // выносит в отдельный файл все библиотеки-зависимости из "node_modules"
+        splitChunks: {
+          cacheGroups: {
+            commons: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all'
+            }
+          }
+        }
       },
       module: {
         rules: [
@@ -440,8 +499,9 @@ function buildJs() {
         ]
       },
       externals: {
-        //jquery: 'jQuery'
-        //bootstrap: 'Bootstrap'
+        // раскомментировать, чтобы убрать сторонние библиотеки из сборки, например, чтобы подключить их отдельно (cdn, local etc)
+        // jquery: 'jQuery'
+        // bootstrap: 'Bootstrap'
       }
     }))
     .pipe(dest(`${dir.build}js`));
@@ -463,6 +523,33 @@ function buildJsProduction() {
       output: {
         filename: '[name].js',
       },
+      optimization: {
+        removeAvailableModules: true, // удаляет дубликаты модулей
+        removeEmptyChunks: true,
+        concatenateModules: true, // дефолтные настройки для production-mode
+        minimize: true, // дефолтные настройки для production-mode
+        minimizer: [
+          new TerserPlugin({
+            parallel: true, // распараллеливание потоков для увеличения производительности ? - не проверено
+            // extractComments: true, // выносит все комментарии в отдельные файлы
+            terserOptions: { // просто удаляем ВСЕ комментарии
+              output: {
+                comments: false,
+              },
+            },
+          }),
+        ],
+        // выносит в отдельный файл все библиотеки-зависимости из "node_modules"
+        splitChunks: {
+          cacheGroups: {
+            commons: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all'
+            }
+          }
+        }
+      },
       module: {
         rules: [
           {
@@ -475,9 +562,15 @@ function buildJsProduction() {
           }
         ]
       },
-      // externals: {
-      //   jquery: 'jQuery'
-      // }
+      externals: [
+        {
+          //jquery: 'jQuery',
+          //svg4everybody: 'svg4everybody',
+        },
+        // Удаление внешних модулей из сборки по Regex-маске
+          /*/^(svg4everybody|\$)$/i,*/
+         /* /^(object-fit-images|\$)$/i,*/
+      ]
     }))
     .pipe(dest(`${dir.build}js`));
 }
@@ -626,7 +719,7 @@ exports.build = series(
   parallel(clearBuildDir),
   parallel(compileHtml, copyAssets, generateSvgSprite, generatePngSprite, favicons),
   parallel(copyImg, writeSassImportsFile, writeJsRequiresFile),
-  parallel(compileSass, buildJsProduction),
+  parallel(compileSassProd, buildJsProduction),
 );
 
 
